@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Weather App</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <div class="card">
+            <div class="search">
+                <input type="text" placeholder="Enter city name" spellcheck="false" id="city-name">
+            
+                <button onclick="checkWeather()">
+                    <img src="images/search.png" class="search-icon" alt="Search">
+                </button>
+                
+                
+            </div>
+            <div class="error">
+                <p>Invalid city name</p>
+            </div>
+            <div class="weather">
+                <img src="images/rain.png" class="weather-icon">
+                <h1 class="temp">22°C</h1>
+                <h2 class="city">New York</h2>
+                <div class="details">
+                    <div class="col">
+                        <img src="images/humidity.png">
+                        <div>
+                            <p class="humidity">50%</p>
+                            <p>Humidity</p>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <img src="images/wind.png">
+                        <div>
+                            <p class="wind">15 km/h</p>
+                            <p>Wind Speed</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            const apiKey = "ff898a98464e405adbf4a76edbef3e6d"; 
+            
+            async function checkWeather() {
+                const cityInput = document.getElementById("city-name");
+                const city = cityInput.value || "Tokyo";
+                const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+                
+                const weatherContainer = document.querySelector(".weather");
+                const errorContainer = document.querySelector(".error");
+            
+                const searchBox = document.querySelector(".search input");
+                const searchBtn = document.querySelector(".search button");
+                const weatherIcon = document.querySelector(".weather-icon");
+
+                try{
+                    errorContainer.style.display = "none";
+                    weatherContainer.style.display = "none";
+                    cityInput.classList.remove("shake");
+
+                    if(!city){
+                        throw new Error("City name cannot be empty");
+                    }
+
+                    const response = await fetch(apiUrl);
+
+                    if(!response.ok) {
+                        throw new Error("Invalid city name");
+                    }
+
+                    const data = await response.json();
+
+                    document.querySelector(".temp").textContent = `${data.main.temp}°C`;
+                    document.querySelector(".city").textContent = data.name;
+                    document.querySelector(".humidity").textContent = `${data.main.humidity}%`;
+                    document.querySelector(".wind").textContent = `${data.wind.speed} km/h`;
+                
+
+                    if(data.weather[0].main == "Clouds"){
+                        weatherIcon.src = "images/clouds.png";
+                    }
+                    else if(data.weather[0].main == "Clear"){
+                        weatherIcon.src = "images/clear.png";
+                    }
+                    else if(data.weather[0].main == "Rain"){
+                        weatherIcon.src = "images/rain.png";
+                    }
+                    else if(data.weather[0].main == "Mist"){
+                        weatherIcon.src = "images/mist.png";
+                    }
+                    else if(data.weather[0].main == "Drizzle"){
+                        weatherIcon.src = "images/drizzle.png";
+                    }
+                weatherContainer.style.display = "block";
+                } catch(error){
+                    errorContainer.style.display = "block";
+                    errorContainer.querySelector("p").textContent = error.message;
+
+                    cityInput.classList.add("shake");
+                    setTimeout(() => cityInput.classList.remove("shake"), 500);
+                }
+                
+
+            }
+        </script>
+    </body>
+</html>
